@@ -23,7 +23,8 @@
 ├── src/
 │   ├── assets/                 # 项目静态资源
 │   ├── components/             # Vue 组件
-│   │   └──final_punch-in.vue   # 代码实现文件
+│   │   └──final_punch-in.vue   # 代码实现主体组件
+│   │   └──timeShow.vue         # 时间显示组件
 │   ├── App.vue                 # 主组件
 │   └── main.js                 # 入口文件
 ├── public/
