@@ -1,24 +1,24 @@
 <!--suppress JSUnresolvedReference -->
 <template>
   <div class="app-container">
-    <!-- 打卡状态标签 -->
+    <!-- 时间显示 -->
+    <timeShow />
+
+    <!-- 打卡状态 -->
     <span v-if="clockCount === 0" class="tag tag-red">请上班打卡</span>
     <span v-if="clockCount === 1" class="tag tag-green">请下班打卡</span>
     <span v-if="clockCount === 2" class="tag tag-blue">今天的打卡完成</span>
 
+    <!-- 简单功能 -->
     <div class="storageOperate">
-      <!-- 添加随机记录按钮 -->
       <button @click="addRandomRecord" class="btn-primary">添加随机记录</button>
-
-      <!-- 重置本地存储按钮 -->
       <button @click="resetLocalStorage" class="btn-primary">重置本地存储</button>
     </div>
-
     <div class="clock-actions">
       <button class="btn-primary" @click="handleClockInOut" :disabled="clockCount >= 2">打卡</button>
     </div>
 
-    <!-- 打卡记录表格 -->
+    <!-- 打卡记录 -->
     <transition-group name="fade" tag="table" class="table">
       <thead>
       <tr>
@@ -49,7 +49,7 @@
       <button @click="handlePageChange('next')" :disabled="clockRecords.length <= currentPage * itemsPerPage">下一页</button>
     </div>
 
-    <!-- 垃圾桶表格，只有在垃圾桶不为空时显示 -->
+    <!-- 垃圾桶表格 -->
     <div v-if="trashRecords.length > 0" class="trashCan">
       <h3>垃圾桶</h3>
       <transition-group name="fade" tag="table" class="table">
@@ -81,6 +81,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import * as echarts from 'echarts';
+import timeShow from './timeShow.vue';
 
 // 默认打卡记录数据
 const defaultClockRecords = [
@@ -165,12 +166,11 @@ const updateIndex = () => {
 
 // 排序函数
 const sortRecordsByDate = () => {
-  // 添加缓冲时间，让排序操作更加平滑
   setTimeout(() => {
     clockRecords.value.sort((a, b) => new Date(b.clockDate) - new Date(a.clockDate));
-    updateIndex(); // 更新索引
-    updateChartData(); // 更新图表
-    saveToLocalStorage(); // 保存到本地存储
+    updateIndex();
+    updateChartData();
+    saveToLocalStorage();
   }, 500); // .5秒的延迟
 };
 
@@ -181,7 +181,7 @@ const timeToMinutes = (time) => {
   return hours * 60 + minutes;
 };
 
-// 添加随机记录的逻辑
+// 添加随机记录
 const getRandomTime = (minHour, maxHour) => {
   const randomHour = Math.floor(Math.random() * (maxHour - minHour + 1)) + minHour;
   const randomMinute = Math.floor(Math.random() * 60);
@@ -235,7 +235,7 @@ const handleClockInOut = () => {
       return;
     } else if (todayRecord.clockCount === 1) {
       todayRecord.workEnd = `${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}`;
-      todayRecord.clockCount = 2; // 下班打卡后更新为2
+      todayRecord.clockCount = 2;
       clockCount.value = 2; // 下班打卡后，设置 clockCount 为 2
     }
   } else {
@@ -251,10 +251,9 @@ const handleClockInOut = () => {
     clockCount.value = 1; // 上班打卡后，设置 clockCount 为 1
   }
 
-  // 在打卡记录更新后保存到本地存储
   sortRecordsByDate();
   updateChartData();
-  saveToLocalStorage();  // 确保每次打卡后保存
+  saveToLocalStorage();
 };
 
 // 删除操作
@@ -283,11 +282,11 @@ const handleDelete = (index) => {
 };
 
 // 恢复操作
-let restoreLock = false; // 恢复锁，防止多次快速点击
+let restoreLock = false;
 const handleRestore = (index) => {
-  if (restoreLock) return; // 如果锁定，则返回
+  if (restoreLock) return;
 
-  restoreLock = true; // 设置锁定状态，开始恢复操作
+  restoreLock = true;
   const recordToRestore = trashRecords.value.find(record => record.index === index);
   if (recordToRestore) {
     const existingRecord = clockRecords.value.find(record => record.clockDate === recordToRestore.clockDate);
@@ -298,7 +297,7 @@ const handleRestore = (index) => {
         clockRecords.value = clockRecords.value.filter(record => record.index !== existingRecord.index); // 删除旧记录
         clockRecords.value.push(recordToRestore); // 恢复记录
         clockCount.value = recordToRestore.clockCount;
-        trashRecords.value = trashRecords.value.filter(record => record.index !== index); // 从垃圾桶中移除
+        trashRecords.value = trashRecords.value.filter(record => record.index !== index);
         sortRecordsByDate();
         updateChartData();
         saveToLocalStorage();
@@ -306,31 +305,29 @@ const handleRestore = (index) => {
     } else {
       clockRecords.value.push(recordToRestore); // 如果没有重复记录，直接恢复
       clockCount.value = recordToRestore.clockCount;
-      trashRecords.value = trashRecords.value.filter(record => record.index !== index); // 从垃圾桶中移除
+      trashRecords.value = trashRecords.value.filter(record => record.index !== index);
       sortRecordsByDate();
       updateChartData();
       saveToLocalStorage();
     }
   }
 
-  // 设置2秒的缓冲时间，结束后解除锁定
   setTimeout(() => {
-    restoreLock = false; // 解除锁定状态
+    restoreLock = false;
   }, 2000);
 };
 
 // 彻底删除操作
-let deletePermanentLock = false; // 彻底删除锁，防止多次快速点击
+let deletePermanentLock = false;
 const handlePermanentlyDelete = (index) => {
-  if (deletePermanentLock) return; // 如果锁定，则返回
+  if (deletePermanentLock) return;
 
-  deletePermanentLock = true; // 设置锁定状态，开始彻底删除操作
-  trashRecords.value = trashRecords.value.filter(record => record.index !== index); // 从垃圾桶中删除目标记录
+  deletePermanentLock = true;
+  trashRecords.value = trashRecords.value.filter(record => record.index !== index);
   saveToLocalStorage();
 
-  // 设置2秒的缓冲时间，结束后解除锁定
   setTimeout(() => {
-    deletePermanentLock = false; // 解除锁定状态
+    deletePermanentLock = false;
   }, 2000);
 };
 
@@ -341,7 +338,7 @@ const updateChartData = () => {
   if (myChart) {
     myChart.setOption({
       title: {
-        text: '可视化：近7天内数据', // 图表标题
+        text: '可视化：近7天内数据',
         left: 'center',
         textStyle: {
           fontSize: 16,
@@ -355,20 +352,20 @@ const updateChartData = () => {
       legend: {
         data: ['上班时间', '下班时间'],
         left: 'center',
-        top: '30px', // 将图例向下移动，避免遮挡标题
+        top: '30px',
       },
       xAxis: {
         data: chartData.dates,
         axisLabel: { interval: 0 },
-        name: '日期', // x轴标签
-        axisLine: { // 显示x轴的直线
+        name: '日期',
+        axisLine: {
           lineStyle: {
             color: '#333',
             width: 2,
             type: 'solid',
           },
         },
-        splitLine: { // 显示x轴的分隔线
+        splitLine: {
           show: true,
           lineStyle: {
             color: '#ddd',
@@ -448,25 +445,26 @@ const drawChart = () => {
   updateChartData();
 };
 
-// 每天6点后更新状态
 onMounted(() => {
-  loadFromLocalStorage();
-  const currentTime = new Date();
-  const currentDate = `${currentTime.getFullYear()}-${(currentTime.getMonth() + 1).toString().padStart(2, '0')}-${currentTime.getDate().toString().padStart(2, '0')}`;
+  if (!sessionStorage.getItem('refreshed')) {
+    sessionStorage.setItem('refreshed', 'true');
+    window.location.reload();
+  } else {
+    loadFromLocalStorage();
+    const currentTime = new Date();
+    const currentDate = `${currentTime.getFullYear()}-${(currentTime.getMonth() + 1).toString().padStart(2, '0')}-${currentTime.getDate().toString().padStart(2, '0')}`;
 
-  // 如果当前时间已经过了6:00点，且当天没有打卡记录，只更新状态为“请上班打卡”
-  if (currentTime.getHours() >= 6) {
-    const todayRecord = clockRecords.value.find(record => record.clockDate === currentDate);
-
-    if (!todayRecord) {
-      clockCount.value = 0; // 设置为“请上班打卡”状态
+    // 如果当前时间已经过了6:00点，且当天没有打卡记录，只更新状态为“请上班打卡”
+    if (currentTime.getHours() >= 6) {
+      const todayRecord = clockRecords.value.find(record => record.clockDate === currentDate);
+      if (!todayRecord) {
+        clockCount.value = 0;
+      }
     }
+
+    drawChart();
   }
-
-  drawChart(); // 绘制图表
 });
-
-
 </script>
 
 <style scoped>
@@ -478,6 +476,7 @@ onMounted(() => {
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   position: relative;
+  user-select: none;
 }
 
 h2 {
@@ -489,9 +488,10 @@ h2 {
 
 .storageOperate {
   --width: 30px;
+  --height: 158px;
   position: absolute;
   right: var(--width);
-  top: var(--width);
+  top: var(--height);
 
   & > button {
     border-radius: 12px;

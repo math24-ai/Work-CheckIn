@@ -1,14 +1,15 @@
 <template>
-  <HelloWorld />
+  <final_punch_in />
 </template>
 
 <script>
-import HelloWorld from './components/final_punch-in.vue'
+import final_punch_in from './components/final_punch-in.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    final_punch_in
   }
 }
 </script>
+
