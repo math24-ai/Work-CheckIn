@@ -1,24 +1,32 @@
-# final_punch-in
+# 打卡管理系统
 
-## Project setup
-```
-npm install
-```
+这是一个简单的打卡管理系统，允许用户进行上班打卡、下班打卡、查看历史打卡记录、删除和恢复打卡记录，并且支持数据可视化展示。系统内置了打卡记录，支持分页显示以及垃圾桶功能来临时保存删除的记录。
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## 项目功能
 
-### Compiles and minifies for production
-```
-npm run build
-```
+- **打卡状态**：显示当前是否需要上班打卡、下班打卡或今日已完成打卡。
+- **打卡操作**：支持上班和下班打卡，自动记录时间。
+- **打卡记录**：查看历史打卡记录，支持按日期排序，显示打卡次数及时间。
+- **分页**：支持打卡记录分页展示，每页显示指定数量的记录。
+- **垃圾桶**：删除的记录将移至垃圾桶，可恢复或彻底删除。
+- **数据可视化**：基于打卡记录的时间数据，展示近7天内的上班时间和下班时间。
 
-### Lints and fixes files
-```
-npm run lint
-```
+## 技术栈
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- **Vue 3**：用于构建用户界面。
+- **ECharts**：用于数据可视化展示。
+- **LocalStorage**：用于存储用户的打卡数据，使用户在刷新页面后仍能保持数据状态。
+
+## 项目结构
+
+```bash
+├── src/
+│   ├── assets/                 # 项目静态资源
+│   ├── components/             # Vue 组件
+│   │   └──final_punch-in.vue   # 代码实现文件
+│   ├── App.vue                 # 主组件
+│   └── main.js                 # 入口文件
+├── public/
+│   └── index.html              # HTML 模板
+├── package.json                # 项目依赖和配置
+└── README.md                   # 项目文档
