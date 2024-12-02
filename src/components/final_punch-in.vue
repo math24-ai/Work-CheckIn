@@ -378,7 +378,7 @@ const updateChartData = () => {
         name: '打卡时间',
         max: 1440,
         axisLabel: {
-          formatter: (value) => `${Math.floor(value / 60)}小时`, // 显示小时单位
+          formatter: (value) => `${Math.floor(value / 60)}时`, // 显示小时单位
         },
         axisLine: {
           show: true,
@@ -435,7 +435,7 @@ const drawChart = () => {
         return `${date}<br />上班：${Math.floor(workStart / 60)}:${String(workStart % 60).padStart(2, '0')}<br />下班：${workEnd ? `${Math.floor(workEnd / 60)}:${String(workEnd % 60).padStart(2, '0')}` : '未打卡'}`;
       } },
     xAxis: { data: chartData.dates },
-    yAxis: { type: 'value', axisLabel: { formatter: (value) => `${Math.floor(value / 60)}小时` } },
+    yAxis: { type: 'value', axisLabel: { formatter: (value) => `${Math.floor(value / 60)}时` } },
     series: [
       { name: '上班时间', type: 'line', data: chartData.workStartTimes },
       { name: '下班时间', type: 'line', data: chartData.workEndTimes },
